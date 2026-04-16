@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Sun Tropez</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff7ed; color: #1f2937; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #ea580c, #f97316); color: white; padding: 20px 24px; }
+    header h1 { font-size: 20px; }
+    header p { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+    main { max-width: 800px; margin: 24px auto; padding: 0 16px; }
+    .login-card, .content-card {
+      background: white; border-radius: 16px; padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px;
+    }
+    label { font-size: 14px; font-weight: 600; display: block; margin-bottom: 6px; }
+    input[type=password] {
+      width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb;
+      border-radius: 10px; font-size: 15px; outline: none; margin-bottom: 12px;
+    }
+    input[type=password]:focus { border-color: #f97316; }
+    .btn { padding: 12px 24px; background: linear-gradient(135deg, #ea580c, #f97316);
+      color: white; border: none; border-radius: 10px; font-size: 15px;
+      font-weight: 600; cursor: pointer; }
+    .btn:hover { opacity: 0.9; }
+    .btn-danger { background: #ef4444; padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 10px 12px; background: #fff7ed; color: #6b7280;
+      font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #fed7aa; }
+    td { padding: 12px 12px; border-bottom: 1px solid #f3f4f6; }
+    tr:hover td { background: #fffbf7; }
+    .hidden { display: none; }
+    .badge { background: #dcfce7; color: #16a34a; padding: 3px 8px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    h2 { font-size: 18px; margin-bottom: 16px; color: #1f2937; }
+    .count { color: #9ca3af; font-size: 14px; font-weight: 400; }
+    .filter-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-row input { padding: 8px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; }
+    .filter-row input:focus { border-color: #f97316; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏐 Admin — Sun Tropez</h1>
+  <p>Gestionare rezervări</p>
+</header>
+
+<main>
+  <div class="login-card" id="login-section">
+    <h2>Autentificare</h2>
+    <label for="token-input">Parolă admin</label>
+    <input type="password" id="token-input" placeholder="Introdu parola..." />
+    <button class="btn" onclick="login()">Intră</button>
+    <p id="login-error" style="color:red;margin-top:10px;font-size:14px;"></p>
+  </div>
+
+  <div class="content-card hidden" id="admin-section">
+    <h2>Rezervări <span class="count" id="count-label"></span></h2>
+    <div class="filter-row">
+      <input type="date" id="filter-date" placeholder="Filtrează după dată" />
+      <input type="text" id="filter-name" placeholder="Caută după nume..." />
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Data</th>
+            <th>Ora</th>
+            <th>Nume</th>
+            <th>Email</th>
+            <th>Înregistrat</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="bookings-table"></tbody>
+      </table>
+    </div>
+    <p id="no-results" class="hidden" style="color:#9ca3af;text-align:center;padding:20px;font-size:14px;">Nu există rezervări.</p>
+  </div>
+</main>
+
+<script>
+let adminToken = '';
+let allBookings = [];
+
+function login() {
+  adminToken = document.getElementById('token-input').value.trim();
+  loadBookings();
+}
+
+document.getElementById('token-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+
+async function loadBookings() {
+  try {
+    const res = await fetch('/api/admin/bookings', {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (res.status === 401) {
+      document.getElementById('login-error').textContent = 'Parolă incorectă.';
+      return;
+    }
+    allBookings = await res.json();
+    document.getElementById('login-section').classList.add('hidden');
+    document.getElementById('admin-section').classList.remove('hidden');
+    renderTable();
+  } catch {
+    document.getElementById('login-error').textContent = 'Eroare de conexiune.';
+  }
+}
+
+function renderTable() {
+  const filterDate = document.getElementById('filter-date').value;
+  const filterName = document.getElementById('filter-name').value.toLowerCase();
+
+  let filtered = allBookings.filter(b => {
+    if (filterDate && b.date !== filterDate) return false;
+    if (filterName && !`${b.prenume} ${b.nume}`.toLowerCase().includes(filterName)) return false;
+    return true;
+  });
+
+  document.getElementById('count-label').textContent = `(${filtered.length} rezervări)`;
+
+  const tbody = document.getElementById('bookings-table');
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    document.getElementById('no-results').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('no-results').classList.add('hidden');
+
+  filtered.forEach((b, i) => {
+    const pad = h => String(h).padStart(2, '0') + ':00';
+    const dateFormatted = new Date(b.date + 'T12:00:00').toLocaleDateString('ro-RO', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+    const createdFormatted = new Date(b.created_at).toLocaleString('ro-RO', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td><strong>${dateFormatted}</strong></td>
+      <td><span class="badge">${pad(b.slot_start)} – ${pad(b.slot_end)}</span></td>
+      <td>${b.prenume} ${b.nume}</td>
+      <td>${b.email}</td>
+      <td style="color:#9ca3af">${createdFormatted}</td>
+      <td><button class="btn btn-danger" onclick="deleteBooking(${b.id})">Șterge</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function deleteBooking(id) {
+  if (!confirm('Ștergi această rezervare?')) return;
+  await fetch(`/api/admin/bookings/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-token': adminToken }
+  });
+  await loadBookings();
+}
+
+document.getElementById('filter-date').addEventListener('input', renderTable);
+document.getElementById('filter-name').addEventListener('input', renderTable);
+</script>
+
+</body>
+</html>

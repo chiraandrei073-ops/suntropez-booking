@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rezervare Teren - Sun Tropez Beach Volleyball</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">🏐</div>
+      <div>
+        <h1>Sun Tropez Beach Volleyball</h1>
+        <p>Rezervare teren online</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- STEP 1: Date picker -->
+    <section class="card" id="step-date">
+      <h2><span class="step-badge">1</span> Alege data</h2>
+      <div class="date-nav">
+        <button id="prev-week" class="nav-btn">&#8592;</button>
+        <span id="week-label"></span>
+        <button id="next-week" class="nav-btn">&#8594;</button>
+      </div>
+      <div class="days-grid" id="days-grid"></div>
+    </section>
+
+    <!-- STEP 2: Slot picker -->
+    <section class="card hidden" id="step-slots">
+      <h2><span class="step-badge">2</span> Alege ora <span id="selected-date-label" class="date-label"></span></h2>
+      <p class="hint">Poți selecta 1 sau 2 ore consecutive. Maxim 2 ore pe zi.</p>
+      <div class="slots-grid" id="slots-grid"></div>
+      <button class="btn-primary" id="confirm-slots" disabled>Continuă</button>
+    </section>
+
+    <!-- STEP 3: Form -->
+    <section class="card hidden" id="step-form">
+      <h2><span class="step-badge">3</span> Datele tale</h2>
+      <div class="summary-box" id="booking-summary"></div>
+      <form id="booking-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prenume">Prenume</label>
+            <input type="text" id="prenume" placeholder="Ion" required />
+          </div>
+          <div class="form-group">
+            <label for="nume">Nume</label>
+            <input type="text" id="nume" placeholder="Popescu" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email (pentru confirmare)</label>
+          <input type="email" id="email" placeholder="email@exemplu.ro" required />
+        </div>
+        <button type="submit" class="btn-primary" id="submit-btn">Confirmă rezervarea</button>
+      </form>
+    </section>
+
+    <!-- STEP 4: Success -->
+    <section class="card hidden" id="step-success">
+      <div class="success-icon">✅</div>
+      <h2>Rezervare confirmată!</h2>
+      <p>Vei primi un email de confirmare în câteva minute.</p>
+      <div class="summary-box" id="success-summary"></div>
+      <button class="btn-secondary" onclick="location.reload()">Fă o nouă rezervare</button>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Sun Tropez Beach Volleyball &mdash; Salicea</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
