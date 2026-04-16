@@ -4,71 +4,223 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Sun Tropez</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff7ed; color: #1f2937; min-height: 100vh; }
-    header { background: linear-gradient(135deg, #ea580c, #f97316); color: white; padding: 20px 24px; }
-    header h1 { font-size: 20px; }
-    header p { font-size: 13px; opacity: 0.8; margin-top: 4px; }
-    main { max-width: 800px; margin: 24px auto; padding: 0 16px; }
-    .login-card, .content-card {
-      background: white; border-radius: 16px; padding: 28px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px;
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f9fafb; color: #1f2937; min-height: 100vh; }
+
+    header {
+      background: linear-gradient(135deg, #ea580c, #f97316);
+      color: white;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 16px rgba(234,88,12,0.25);
     }
-    label { font-size: 14px; font-weight: 600; display: block; margin-bottom: 6px; }
-    input[type=password] {
-      width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb;
-      border-radius: 10px; font-size: 15px; outline: none; margin-bottom: 12px;
+    header h1 { font-size: 20px; font-weight: 800; }
+    header p  { font-size: 13px; opacity: 0.85; margin-top: 3px; }
+    .header-back { color: white; text-decoration: none; font-size: 13px; font-weight: 600;
+      background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 8px;
+      transition: background 0.15s; }
+    .header-back:hover { background: rgba(255,255,255,0.3); }
+
+    main { max-width: 900px; margin: 28px auto; padding: 0 16px; }
+
+    /* LOGIN */
+    .login-card {
+      background: white; border-radius: 20px; padding: 36px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07); max-width: 400px; margin: 60px auto;
     }
-    input[type=password]:focus { border-color: #f97316; }
-    .btn { padding: 12px 24px; background: linear-gradient(135deg, #ea580c, #f97316);
-      color: white; border: none; border-radius: 10px; font-size: 15px;
-      font-weight: 600; cursor: pointer; }
-    .btn:hover { opacity: 0.9; }
-    .btn-danger { background: #ef4444; padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+    .login-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .login-card label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; color: #374151; }
+    .login-card input {
+      width: 100%; padding: 13px 14px; border: 2px solid #e5e7eb;
+      border-radius: 12px; font-size: 15px; font-family: 'Inter', sans-serif;
+      outline: none; margin-bottom: 14px; transition: border 0.15s;
+    }
+    .login-card input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+    #login-error { color: #ef4444; font-size: 13px; margin-top: 8px; }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-size: 40px;
+      font-weight: 800;
+      color: #f97316;
+      line-height: 1;
+    }
+    .stat-card .stat-label {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* TABLE CARD */
+    .table-card {
+      background: white; border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden;
+    }
+    .table-header {
+      padding: 20px 24px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .table-header h2 { font-size: 17px; font-weight: 700; }
+    .count-badge {
+      background: #fff7ed;
+      color: #ea580c;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .filters {
+      padding: 14px 24px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .filters input {
+      padding: 9px 12px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border 0.15s;
+    }
+    .filters input:focus { border-color: #f97316; }
+
+    .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { text-align: left; padding: 10px 12px; background: #fff7ed; color: #6b7280;
-      font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #fed7aa; }
-    td { padding: 12px 12px; border-bottom: 1px solid #f3f4f6; }
+    th {
+      text-align: left; padding: 12px 16px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      color: #9ca3af; letter-spacing: 0.5px; border-bottom: 1px solid #f3f4f6;
+      background: #fafafa;
+    }
+    td { padding: 14px 16px; border-bottom: 1px solid #f9fafb; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
     tr:hover td { background: #fffbf7; }
-    .hidden { display: none; }
-    .badge { background: #dcfce7; color: #16a34a; padding: 3px 8px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    h2 { font-size: 18px; margin-bottom: 16px; color: #1f2937; }
-    .count { color: #9ca3af; font-size: 14px; font-weight: 400; }
-    .filter-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-    .filter-row input { padding: 8px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; }
-    .filter-row input:focus { border-color: #f97316; }
+
+    .badge-slot {
+      background: #dcfce7; color: #16a34a;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-future { background: #dbeafe; color: #2563eb; }
+    .badge-past   { background: #f3f4f6; color: #9ca3af; }
+
+    .btn { padding: 12px 24px; background: linear-gradient(135deg, #ea580c, #f97316);
+      color: white; border: none; border-radius: 12px; font-size: 14px;
+      font-weight: 700; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 2px 8px rgba(234,88,12,0.25); }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-del {
+      background: white; color: #ef4444;
+      border: 1.5px solid #fecaca;
+      padding: 6px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-del:hover { background: #fef2f2; border-color: #ef4444; }
+
+    .hidden { display: none !important; }
+    .no-results { padding: 40px; text-align: center; color: #9ca3af; font-size: 14px; }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .stat-card { padding: 16px 10px; }
+      .stat-card .stat-value { font-size: 28px; }
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>🏐 Admin — Sun Tropez</h1>
-  <p>Gestionare rezervări</p>
+  <div>
+    <h1>🏐 Admin — Sun Tropez</h1>
+    <p>Gestionare rezervări</p>
+  </div>
+  <a href="/" class="header-back">← Site</a>
 </header>
 
-<main>
-  <div class="login-card" id="login-section">
-    <h2>Autentificare</h2>
+<!-- LOGIN -->
+<div id="login-section">
+  <div class="login-card">
+    <h2>🔐 Autentificare</h2>
     <label for="token-input">Parolă admin</label>
     <input type="password" id="token-input" placeholder="Introdu parola..." />
-    <button class="btn" onclick="login()">Intră</button>
-    <p id="login-error" style="color:red;margin-top:10px;font-size:14px;"></p>
+    <button class="btn" onclick="login()" style="width:100%">Intră</button>
+    <p id="login-error"></p>
+  </div>
+</div>
+
+<!-- ADMIN CONTENT -->
+<main id="admin-section" class="hidden">
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-today">—</div>
+      <div class="stat-label">Azi</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-week">—</div>
+      <div class="stat-label">Săptămâna aceasta</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-label">Total</div>
+    </div>
   </div>
 
-  <div class="content-card hidden" id="admin-section">
-    <h2>Rezervări <span class="count" id="count-label"></span></h2>
-    <div class="filter-row">
-      <input type="date" id="filter-date" placeholder="Filtrează după dată" />
-      <input type="text" id="filter-name" placeholder="Caută după nume..." />
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h2>Rezervări</h2>
+        <span class="count-badge" id="count-label">0</span>
+      </div>
+      <button class="btn" onclick="loadAll()" style="font-size:13px;padding:8px 16px">↻ Reîncarcă</button>
     </div>
-    <div style="overflow-x:auto">
+    <div class="filters">
+      <input type="date"   id="filter-date" />
+      <input type="text"   id="filter-name" placeholder="Caută după nume..." />
+    </div>
+    <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>#</th>
             <th>Data</th>
-            <th>Ora</th>
+            <th>Interval</th>
             <th>Nume</th>
             <th>Email</th>
             <th>Înregistrat</th>
@@ -77,9 +229,10 @@
         </thead>
         <tbody id="bookings-table"></tbody>
       </table>
+      <div class="no-results hidden" id="no-results">Nu există rezervări.</div>
     </div>
-    <p id="no-results" class="hidden" style="color:#9ca3af;text-align:center;padding:20px;font-size:14px;">Nu există rezervări.</p>
   </div>
+
 </main>
 
 <script>
@@ -88,18 +241,31 @@ let allBookings = [];
 
 function login() {
   adminToken = document.getElementById('token-input').value.trim();
-  loadBookings();
+  loadAll();
 }
 
 document.getElementById('token-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') login();
 });
 
+async function loadAll() {
+  await Promise.all([loadBookings(), loadStats()]);
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/admin/stats', { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) return;
+    const s = await res.json();
+    document.getElementById('stat-today').textContent = s.today;
+    document.getElementById('stat-week').textContent  = s.week;
+    document.getElementById('stat-total').textContent = s.total;
+  } catch {}
+}
+
 async function loadBookings() {
   try {
-    const res = await fetch('/api/admin/bookings', {
-      headers: { 'x-admin-token': adminToken }
-    });
+    const res = await fetch('/api/admin/bookings', { headers: { 'x-admin-token': adminToken } });
     if (res.status === 401) {
       document.getElementById('login-error').textContent = 'Parolă incorectă.';
       return;
@@ -123,7 +289,7 @@ function renderTable() {
     return true;
   });
 
-  document.getElementById('count-label').textContent = `(${filtered.length} rezervări)`;
+  document.getElementById('count-label').textContent = filtered.length;
 
   const tbody = document.getElementById('bookings-table');
   tbody.innerHTML = '';
@@ -134,6 +300,8 @@ function renderTable() {
   }
   document.getElementById('no-results').classList.add('hidden');
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   filtered.forEach((b, i) => {
     const pad = h => String(h).padStart(2, '0') + ':00';
     const dateFormatted = new Date(b.date + 'T12:00:00').toLocaleDateString('ro-RO', {
@@ -142,28 +310,29 @@ function renderTable() {
     const createdFormatted = new Date(b.created_at).toLocaleString('ro-RO', {
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
     });
+    const isFuture = b.date >= todayStr;
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${i + 1}</td>
+      <td style="color:#9ca3af;font-size:12px">${i + 1}</td>
       <td><strong>${dateFormatted}</strong></td>
-      <td><span class="badge">${pad(b.slot_start)} – ${pad(b.slot_end)}</span></td>
-      <td>${b.prenume} ${b.nume}</td>
-      <td>${b.email}</td>
-      <td style="color:#9ca3af">${createdFormatted}</td>
-      <td><button class="btn btn-danger" onclick="deleteBooking(${b.id})">Șterge</button></td>
+      <td><span class="badge-slot ${isFuture ? 'badge-future' : 'badge-past'}">${pad(b.slot_start)} – ${pad(b.slot_end)}</span></td>
+      <td><strong>${b.prenume} ${b.nume}</strong></td>
+      <td style="color:#6b7280">${b.email}</td>
+      <td style="color:#9ca3af;font-size:12px">${createdFormatted}</td>
+      <td><button class="btn-del" onclick="deleteBooking(${b.id})">Anulează</button></td>
     `;
     tbody.appendChild(tr);
   });
 }
 
 async function deleteBooking(id) {
-  if (!confirm('Ștergi această rezervare?')) return;
+  if (!confirm('Anulezi această rezervare?')) return;
   await fetch(`/api/admin/bookings/${id}`, {
     method: 'DELETE',
     headers: { 'x-admin-token': adminToken }
   });
-  await loadBookings();
+  await loadAll();
 }
 
 document.getElementById('filter-date').addEventListener('input', renderTable);

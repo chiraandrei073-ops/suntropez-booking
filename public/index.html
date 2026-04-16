@@ -4,16 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rezervare Teren - Sun Tropez Beach Volleyball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <header>
+    <div class="header-bg"></div>
     <div class="header-inner">
-      <div class="logo">🏐</div>
-      <div>
+      <div class="header-text">
+        <div class="header-logo">🏐</div>
         <h1>Sun Tropez Beach Volleyball</h1>
-        <p>Rezervare teren online</p>
+        <p class="tagline">Rezervă terenul tău — nisip, soare și joc</p>
       </div>
     </div>
   </header>
@@ -24,19 +28,29 @@
     <section class="card" id="step-date">
       <h2><span class="step-badge">1</span> Alege data</h2>
       <div class="date-nav">
-        <button id="prev-week" class="nav-btn">&#8592;</button>
-        <span id="week-label"></span>
-        <button id="next-week" class="nav-btn">&#8594;</button>
+        <button id="prev-month" class="nav-btn">&#8592;</button>
+        <span id="month-label"></span>
+        <button id="next-month" class="nav-btn">&#8594;</button>
+      </div>
+      <div class="calendar-header">
+        <span>Lun</span><span>Mar</span><span>Mie</span>
+        <span>Joi</span><span>Vin</span><span>Sâm</span><span>Dum</span>
       </div>
       <div class="days-grid" id="days-grid"></div>
+      <p class="hint">Rezervările sunt disponibile în următoarele 14 zile.</p>
     </section>
 
     <!-- STEP 2: Slot picker -->
     <section class="card hidden" id="step-slots">
       <h2><span class="step-badge">2</span> Alege ora <span id="selected-date-label" class="date-label"></span></h2>
-      <p class="hint">Poți selecta 1 sau 2 ore consecutive. Maxim 2 ore pe zi.</p>
+      <p class="hint">Selectează 1 sau 2 ore consecutive. Maxim 2 ore per zi.</p>
       <div class="slots-grid" id="slots-grid"></div>
-      <button class="btn-primary" id="confirm-slots" disabled>Continuă</button>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot available"></span> Disponibil</span>
+        <span class="leg-item"><span class="leg-dot selected"></span> Selectat</span>
+        <span class="leg-item"><span class="leg-dot booked"></span> Rezervat</span>
+      </div>
+      <button class="btn-primary" id="confirm-slots" disabled>Continuă →</button>
     </section>
 
     <!-- STEP 3: Form -->
@@ -64,9 +78,9 @@
 
     <!-- STEP 4: Success -->
     <section class="card hidden" id="step-success">
-      <div class="success-icon">✅</div>
+      <div class="success-icon">🏐</div>
       <h2>Rezervare confirmată!</h2>
-      <p>Vei primi un email de confirmare în câteva minute.</p>
+      <p class="success-sub">Ne vedem pe teren! Un email de confirmare a fost trimis.</p>
       <div class="summary-box" id="success-summary"></div>
       <button class="btn-secondary" onclick="location.reload()">Fă o nouă rezervare</button>
     </section>
@@ -74,7 +88,7 @@
   </main>
 
   <footer>
-    <p>Sun Tropez Beach Volleyball &mdash; Salicea</p>
+    <p>Sun Tropez Beach Volleyball &mdash; Salicea &mdash; <a href="/admin">Admin</a></p>
   </footer>
 
   <script src="app.js"></script>

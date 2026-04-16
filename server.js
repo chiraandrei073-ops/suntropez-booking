@@ -149,16 +149,38 @@ app.post('/api/bookings', async (req, res) => {
   res.json({ success: true, id: result.lastInsertRowid });
 });
 
-// GET all bookings (admin - protected by token)
+// Admin page route
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// GET all bookings (admin)
 app.get('/api/admin/bookings', (req, res) => {
   const token = req.headers['x-admin-token'];
   if (token !== process.env.ADMIN_TOKEN) {
     return res.status(401).json({ error: 'Neautorizat.' });
   }
   const bookings = db.prepare(
-    'SELECT * FROM bookings ORDER BY date DESC, slot_start ASC'
+    'SELECT * FROM bookings ORDER BY date ASC, slot_start ASC'
   ).all();
   res.json(bookings);
+});
+
+// GET stats (admin)
+app.get('/api/admin/stats', (req, res) => {
+  const token = req.headers['x-admin-token'];
+  if (token !== process.env.ADMIN_TOKEN) {
+    return res.status(401).json({ error: 'Neautorizat.' });
+  }
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
+  const weekStartStr = weekStart.toISOString().slice(0, 10);
+
+  const total     = db.prepare('SELECT COUNT(*) as n FROM bookings').get().n;
+  const todayN    = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date = ?').get(todayStr).n;
+  const weekN     = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date >= ?').get(weekStartStr).n;
+  res.json({ total, today: todayN, week: weekN });
 });
 
 // DELETE booking (admin)
