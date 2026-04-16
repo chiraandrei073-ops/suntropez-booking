@@ -9,155 +9,141 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f9fafb; color: #1f2937; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #1f2937; min-height: 100vh; }
 
     header {
       background: linear-gradient(135deg, #ea580c, #f97316);
-      color: white;
-      padding: 24px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      color: white; padding: 22px 28px;
+      display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0 2px 16px rgba(234,88,12,0.25);
     }
     header h1 { font-size: 20px; font-weight: 800; }
-    header p  { font-size: 13px; opacity: 0.85; margin-top: 3px; }
-    .header-back { color: white; text-decoration: none; font-size: 13px; font-weight: 600;
+    header p  { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+    .back-link {
+      color: white; text-decoration: none; font-size: 13px; font-weight: 600;
       background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 8px;
-      transition: background 0.15s; }
-    .header-back:hover { background: rgba(255,255,255,0.3); }
+      transition: background 0.15s;
+    }
+    .back-link:hover { background: rgba(255,255,255,0.32); }
 
-    main { max-width: 900px; margin: 28px auto; padding: 0 16px; }
+    main { max-width: 860px; margin: 28px auto; padding: 0 16px 48px; }
 
     /* LOGIN */
     .login-card {
       background: white; border-radius: 20px; padding: 36px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07); max-width: 400px; margin: 60px auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      max-width: 380px; margin: 60px auto;
     }
     .login-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
-    .login-card label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; color: #374151; }
-    .login-card input {
+    .field-label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; color: #374151; }
+    .field-input {
       width: 100%; padding: 13px 14px; border: 2px solid #e5e7eb;
       border-radius: 12px; font-size: 15px; font-family: 'Inter', sans-serif;
-      outline: none; margin-bottom: 14px; transition: border 0.15s;
+      outline: none; margin-bottom: 14px; transition: all 0.15s;
     }
-    .login-card input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
-    #login-error { color: #ef4444; font-size: 13px; margin-top: 8px; }
+    .field-input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+    #login-error { color: #ef4444; font-size: 13px; margin-top: 6px; min-height: 18px; }
+
+    .btn-primary {
+      width: 100%; padding: 13px; background: linear-gradient(135deg, #ea580c, #f97316);
+      color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
+      font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 3px 12px rgba(234,88,12,0.3);
+    }
+    .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
 
     /* STATS */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 24px;
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px;
     }
-    .stat-card {
-      background: white;
-      border-radius: 16px;
-      padding: 22px 20px;
+    .stat-box {
+      background: white; border-radius: 16px; padding: 20px 16px; text-align: center;
       box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      text-align: center;
     }
-    .stat-card .stat-value {
-      font-size: 40px;
-      font-weight: 800;
-      color: #f97316;
-      line-height: 1;
+    .stat-num   { font-size: 38px; font-weight: 800; color: #f97316; line-height: 1; }
+    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 5px; font-weight: 500; }
+
+    /* MONTH SELECTOR */
+    .month-bar {
+      background: white; border-radius: 16px; padding: 16px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
     }
-    .stat-card .stat-label {
-      font-size: 13px;
-      color: #6b7280;
-      margin-top: 6px;
-      font-weight: 500;
+    .month-nav-btn {
+      background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 10px;
+      padding: 8px 16px; cursor: pointer; font-size: 15px; font-weight: 700;
+      color: #ea580c; transition: all 0.15s; font-family: 'Inter', sans-serif;
+    }
+    .month-nav-btn:hover { background: #ffedd5; transform: scale(1.05); }
+    .month-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    #month-display {
+      font-size: 17px; font-weight: 700; color: #1f2937; text-align: center; flex: 1;
+      text-transform: capitalize;
     }
 
-    /* TABLE CARD */
-    .table-card {
+    /* BOOKING LIST */
+    .bookings-card {
       background: white; border-radius: 20px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden;
     }
-    .table-header {
-      padding: 20px 24px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-bottom: 1px solid #f3f4f6;
+    .bookings-card-header {
+      padding: 18px 24px; border-bottom: 1px solid #f3f4f6;
+      display: flex; align-items: center; gap: 10px;
     }
-    .table-header h2 { font-size: 17px; font-weight: 700; }
-    .count-badge {
-      background: #fff7ed;
-      color: #ea580c;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
+    .bookings-card-header h2 { font-size: 16px; font-weight: 700; }
+    .count-pill {
+      background: #fff7ed; color: #ea580c; font-size: 12px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px;
     }
 
-    .filters {
-      padding: 14px 24px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      border-bottom: 1px solid #f3f4f6;
+    .booking-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 24px; border-bottom: 1px solid #f9fafb;
+      transition: background 0.12s;
     }
-    .filters input {
-      padding: 9px 12px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 10px;
-      font-size: 13px;
-      font-family: 'Inter', sans-serif;
-      outline: none;
-      transition: border 0.15s;
-    }
-    .filters input:focus { border-color: #f97316; }
+    .booking-item:last-child { border-bottom: none; }
+    .booking-item:hover { background: #fffbf7; }
 
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th {
-      text-align: left; padding: 12px 16px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      color: #9ca3af; letter-spacing: 0.5px; border-bottom: 1px solid #f3f4f6;
-      background: #fafafa;
+    .booking-date-col {
+      min-width: 110px; text-align: center;
+      background: #fff7ed; border-radius: 12px; padding: 10px 8px;
     }
-    td { padding: 14px 16px; border-bottom: 1px solid #f9fafb; vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fffbf7; }
+    .booking-day   { font-size: 26px; font-weight: 800; color: #ea580c; line-height: 1; }
+    .booking-month { font-size: 11px; font-weight: 600; color: #f97316; text-transform: uppercase; letter-spacing: 0.5px; }
+    .booking-dow   { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 
-    .badge-slot {
-      background: #dcfce7; color: #16a34a;
-      padding: 4px 10px; border-radius: 20px;
-      font-size: 12px; font-weight: 700;
+    .booking-info  { flex: 1; min-width: 0; }
+    .booking-name  { font-size: 15px; font-weight: 700; color: #1f2937; }
+    .booking-email { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .booking-meta  { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+
+    .booking-time {
+      background: #dbeafe; color: #2563eb; font-size: 13px; font-weight: 700;
+      padding: 6px 12px; border-radius: 8px; white-space: nowrap;
+    }
+    .booking-time.past { background: #f3f4f6; color: #9ca3af; }
+
+    .btn-cancel {
+      background: white; color: #ef4444; border: 1.5px solid #fecaca;
+      padding: 7px 13px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s;
       white-space: nowrap;
     }
-    .badge-future { background: #dbeafe; color: #2563eb; }
-    .badge-past   { background: #f3f4f6; color: #9ca3af; }
+    .btn-cancel:hover { background: #fef2f2; border-color: #ef4444; }
 
-    .btn { padding: 12px 24px; background: linear-gradient(135deg, #ea580c, #f97316);
-      color: white; border: none; border-radius: 12px; font-size: 14px;
-      font-weight: 700; font-family: 'Inter', sans-serif;
-      cursor: pointer; transition: all 0.15s;
-      box-shadow: 0 2px 8px rgba(234,88,12,0.25); }
-    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-    .btn-del {
-      background: white; color: #ef4444;
-      border: 1.5px solid #fecaca;
-      padding: 6px 12px; border-radius: 8px;
-      font-size: 12px; font-weight: 600;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer; transition: all 0.15s;
+    .empty-state {
+      padding: 48px 24px; text-align: center; color: #9ca3af; font-size: 14px;
     }
-    .btn-del:hover { background: #fef2f2; border-color: #ef4444; }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
 
     .hidden { display: none !important; }
-    .no-results { padding: 40px; text-align: center; color: #9ca3af; font-size: 14px; }
 
     @media (max-width: 600px) {
-      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .stat-card { padding: 16px 10px; }
-      .stat-card .stat-value { font-size: 28px; }
+      .stats-row { gap: 8px; }
+      .stat-box { padding: 14px 8px; }
+      .stat-num { font-size: 28px; }
+      .booking-item { flex-wrap: wrap; gap: 10px; }
+      .booking-date-col { min-width: 80px; }
     }
   </style>
 </head>
@@ -168,16 +154,16 @@
     <h1>🏐 Admin — Sun Tropez</h1>
     <p>Gestionare rezervări</p>
   </div>
-  <a href="/" class="header-back">← Site</a>
+  <a href="/" class="back-link">← Site</a>
 </header>
 
 <!-- LOGIN -->
 <div id="login-section">
   <div class="login-card">
     <h2>🔐 Autentificare</h2>
-    <label for="token-input">Parolă admin</label>
-    <input type="password" id="token-input" placeholder="Introdu parola..." />
-    <button class="btn" onclick="login()" style="width:100%">Intră</button>
+    <label class="field-label" for="token-input">Parolă admin</label>
+    <input class="field-input" type="password" id="token-input" placeholder="Introdu parola..." />
+    <button class="btn-primary" onclick="login()">Intră</button>
     <p id="login-error"></p>
   </div>
 </div>
@@ -186,67 +172,77 @@
 <main id="admin-section" class="hidden">
 
   <!-- Stats -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value" id="stat-today">—</div>
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-num" id="stat-today">—</div>
       <div class="stat-label">Azi</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-value" id="stat-week">—</div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-week">—</div>
       <div class="stat-label">Săptămâna aceasta</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-value" id="stat-total">—</div>
-      <div class="stat-label">Total</div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-total">—</div>
+      <div class="stat-label">Total rezervări</div>
     </div>
   </div>
 
-  <!-- Table -->
-  <div class="table-card">
-    <div class="table-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <h2>Rezervări</h2>
-        <span class="count-badge" id="count-label">0</span>
-      </div>
-      <button class="btn" onclick="loadAll()" style="font-size:13px;padding:8px 16px">↻ Reîncarcă</button>
+  <!-- Month selector -->
+  <div class="month-bar">
+    <button class="month-nav-btn" id="btn-prev-month" onclick="changeMonth(-1)">‹</button>
+    <div id="month-display"></div>
+    <button class="month-nav-btn" id="btn-next-month" onclick="changeMonth(1)">›</button>
+  </div>
+
+  <!-- Booking list -->
+  <div class="bookings-card">
+    <div class="bookings-card-header">
+      <h2>Rezervări</h2>
+      <span class="count-pill" id="count-label">0</span>
     </div>
-    <div class="filters">
-      <input type="date"   id="filter-date" />
-      <input type="text"   id="filter-name" placeholder="Caută după nume..." />
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Data</th>
-            <th>Interval</th>
-            <th>Nume</th>
-            <th>Email</th>
-            <th>Înregistrat</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="bookings-table"></tbody>
-      </table>
-      <div class="no-results hidden" id="no-results">Nu există rezervări.</div>
-    </div>
+    <div id="booking-list"></div>
   </div>
 
 </main>
 
 <script>
+const MONTHS_RO = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie',
+                   'Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+const DAYS_RO   = ['Dum','Lun','Mar','Mie','Joi','Vin','Sâm'];
+
 let adminToken = '';
-let allBookings = [];
+let viewYear   = new Date().getFullYear();
+let viewMonth  = new Date().getMonth(); // 0-based
 
 function login() {
   adminToken = document.getElementById('token-input').value.trim();
   loadAll();
 }
-
 document.getElementById('token-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') login();
 });
+
+function monthKey(y, m) {
+  return `${y}-${String(m + 1).padStart(2, '0')}`;
+}
+
+function changeMonth(delta) {
+  viewMonth += delta;
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  if (viewMonth < 0)  { viewMonth = 11; viewYear--; }
+  updateMonthDisplay();
+  loadBookings();
+}
+
+function updateMonthDisplay() {
+  document.getElementById('month-display').textContent =
+    `${MONTHS_RO[viewMonth]} ${viewYear}`;
+  // Disable prev if too far back (e.g., more than 12 months ago)
+  const now = new Date();
+  const minYear = now.getFullYear() - 1;
+  document.getElementById('btn-prev-month').disabled =
+    (viewYear < minYear || (viewYear === minYear && viewMonth < now.getMonth()));
+}
 
 async function loadAll() {
   await Promise.all([loadBookings(), loadStats()]);
@@ -254,7 +250,9 @@ async function loadAll() {
 
 async function loadStats() {
   try {
-    const res = await fetch('/api/admin/stats', { headers: { 'x-admin-token': adminToken } });
+    const res = await fetch('/api/admin/stats', {
+      headers: { 'x-admin-token': adminToken }
+    });
     if (!res.ok) return;
     const s = await res.json();
     document.getElementById('stat-today').textContent = s.today;
@@ -265,68 +263,69 @@ async function loadStats() {
 
 async function loadBookings() {
   try {
-    const res = await fetch('/api/admin/bookings', { headers: { 'x-admin-token': adminToken } });
+    const key = monthKey(viewYear, viewMonth);
+    const res = await fetch(`/api/admin/bookings?month=${key}`, {
+      headers: { 'x-admin-token': adminToken }
+    });
     if (res.status === 401) {
       document.getElementById('login-error').textContent = 'Parolă incorectă.';
       return;
     }
-    allBookings = await res.json();
+    const bookings = await res.json();
     document.getElementById('login-section').classList.add('hidden');
     document.getElementById('admin-section').classList.remove('hidden');
-    renderTable();
+    updateMonthDisplay();
+    renderBookings(bookings);
   } catch {
     document.getElementById('login-error').textContent = 'Eroare de conexiune.';
   }
 }
 
-function renderTable() {
-  const filterDate = document.getElementById('filter-date').value;
-  const filterName = document.getElementById('filter-name').value.toLowerCase();
+function renderBookings(bookings) {
+  document.getElementById('count-label').textContent = bookings.length;
+  const list = document.getElementById('booking-list');
 
-  let filtered = allBookings.filter(b => {
-    if (filterDate && b.date !== filterDate) return false;
-    if (filterName && !`${b.prenume} ${b.nume}`.toLowerCase().includes(filterName)) return false;
-    return true;
-  });
-
-  document.getElementById('count-label').textContent = filtered.length;
-
-  const tbody = document.getElementById('bookings-table');
-  tbody.innerHTML = '';
-
-  if (filtered.length === 0) {
-    document.getElementById('no-results').classList.remove('hidden');
+  if (bookings.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        Nicio rezervare în ${MONTHS_RO[viewMonth]} ${viewYear}.
+      </div>`;
     return;
   }
-  document.getElementById('no-results').classList.add('hidden');
 
   const todayStr = new Date().toISOString().slice(0, 10);
+  const pad = h => String(h).padStart(2, '0') + ':00';
 
-  filtered.forEach((b, i) => {
-    const pad = h => String(h).padStart(2, '0') + ':00';
-    const dateFormatted = new Date(b.date + 'T12:00:00').toLocaleDateString('ro-RO', {
-      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
-    });
-    const createdFormatted = new Date(b.created_at).toLocaleString('ro-RO', {
+  list.innerHTML = bookings.map(b => {
+    const d = new Date(b.date + 'T12:00:00');
+    const dayNum   = d.getDate();
+    const monthStr = MONTHS_RO[d.getMonth()].slice(0, 3);
+    const dowStr   = DAYS_RO[d.getDay()];
+    const isFuture = b.date >= todayStr;
+    const createdAt = new Date(b.created_at).toLocaleString('ro-RO', {
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
     });
-    const isFuture = b.date >= todayStr;
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:#9ca3af;font-size:12px">${i + 1}</td>
-      <td><strong>${dateFormatted}</strong></td>
-      <td><span class="badge-slot ${isFuture ? 'badge-future' : 'badge-past'}">${pad(b.slot_start)} – ${pad(b.slot_end)}</span></td>
-      <td><strong>${b.prenume} ${b.nume}</strong></td>
-      <td style="color:#6b7280">${b.email}</td>
-      <td style="color:#9ca3af;font-size:12px">${createdFormatted}</td>
-      <td><button class="btn-del" onclick="deleteBooking(${b.id})">Anulează</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
+    return `
+      <div class="booking-item" id="item-${b.id}">
+        <div class="booking-date-col">
+          <div class="booking-day">${dayNum}</div>
+          <div class="booking-month">${monthStr}</div>
+          <div class="booking-dow">${dowStr}</div>
+        </div>
+        <div class="booking-info">
+          <div class="booking-name">${b.prenume} ${b.nume}</div>
+          <div class="booking-email">${b.email}</div>
+          <div class="booking-meta">Înregistrat: ${createdAt}</div>
+        </div>
+        <div class="booking-time ${isFuture ? '' : 'past'}">${pad(b.slot_start)} – ${pad(b.slot_end)}</div>
+        <button class="btn-cancel" onclick="cancelBooking(${b.id})">Anulează</button>
+      </div>`;
+  }).join('');
 }
 
-async function deleteBooking(id) {
+async function cancelBooking(id) {
   if (!confirm('Anulezi această rezervare?')) return;
   await fetch(`/api/admin/bookings/${id}`, {
     method: 'DELETE',
@@ -334,10 +333,6 @@ async function deleteBooking(id) {
   });
   await loadAll();
 }
-
-document.getElementById('filter-date').addEventListener('input', renderTable);
-document.getElementById('filter-name').addEventListener('input', renderTable);
 </script>
-
 </body>
 </html>

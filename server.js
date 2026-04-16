@@ -94,56 +94,79 @@ app.post('/api/bookings', async (req, res) => {
   ).run(date, slot_start, slot_end, nume, prenume, email);
 
   // Send confirmation email
-  try {
-    const resend = getResend();
-    if (!resend) { console.warn('RESEND_API_KEY lipsește — emailul nu a fost trimis.'); }
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[EMAIL] RESEND_API_KEY lipsește — emailul nu a fost trimis.');
+  } else {
     const formatHour = h => `${String(h).padStart(2, '0')}:00`;
     const dateFormatted = new Date(date + 'T12:00:00').toLocaleDateString('ro-RO', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
+    // Use Resend's shared domain if custom domain not configured
+    const fromDomain = process.env.EMAIL_DOMAIN || 'onboarding@resend.dev';
+    const fromAddress = process.env.EMAIL_DOMAIN
+      ? `Sun Tropez Beach Volleyball <rezervari@${process.env.EMAIL_DOMAIN}>`
+      : 'Sun Tropez <onboarding@resend.dev>';
 
-    if (resend) await resend.emails.send({
-      from: `Sun Tropez Beach Volleyball <rezervari@${process.env.EMAIL_DOMAIN || 'rezervarisuntropez.ro'}>`,
-      to: email,
-      subject: 'Confirmare rezervare teren - Sun Tropez Beach Volleyball',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #fff8f0; border-radius: 12px; overflow: hidden;">
-          <div style="background: linear-gradient(135deg, #f97316, #fb923c); padding: 32px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">🏐 Rezervare confirmată!</h1>
-            <p style="color: #fff3e0; margin: 8px 0 0;">Sun Tropez Beach Volleyball</p>
-          </div>
-          <div style="padding: 32px;">
-            <p style="font-size: 16px; color: #374151;">Salut <strong>${prenume} ${nume}</strong>,</p>
-            <p style="color: #6b7280;">Rezervarea ta a fost înregistrată cu succes!</p>
-            <div style="background: white; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #f97316;">
-              <p style="margin: 0 0 8px;"><strong>📅 Data:</strong> ${dateFormatted}</p>
-              <p style="margin: 0 0 8px;"><strong>⏰ Ora:</strong> ${formatHour(slot_start)} - ${formatHour(slot_end)}</p>
-              <p style="margin: 0;"><strong>⏱ Durată:</strong> ${slot_end - slot_start} ${slot_end - slot_start === 1 ? 'oră' : 'ore'}</p>
+    // Confirmation to client
+    try {
+      const result = await resend.emails.send({
+        from: fromAddress,
+        to: email,
+        subject: 'Confirmare rezervare teren - Sun Tropez Beach Volleyball',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #fff8f0; border-radius: 12px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #f97316, #fb923c); padding: 32px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 24px;">🏐 Rezervare confirmată!</h1>
+              <p style="color: #fff3e0; margin: 8px 0 0;">Sun Tropez Beach Volleyball</p>
             </div>
-            <p style="color: #6b7280; font-size: 14px;">Ne vedem pe teren! Dacă ai întrebări, ne poți contacta direct.</p>
-            <p style="color: #6b7280; font-size: 14px;">— Echipa Sun Tropez 🌴</p>
+            <div style="padding: 32px;">
+              <p style="font-size: 16px; color: #374151;">Salut <strong>${prenume} ${nume}</strong>,</p>
+              <p style="color: #6b7280;">Rezervarea ta a fost înregistrată cu succes!</p>
+              <div style="background: white; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #f97316;">
+                <p style="margin: 0 0 8px;"><strong>📅 Data:</strong> ${dateFormatted}</p>
+                <p style="margin: 0 0 8px;"><strong>⏰ Ora:</strong> ${formatHour(slot_start)} - ${formatHour(slot_end)}</p>
+                <p style="margin: 0;"><strong>⏱ Durată:</strong> ${slot_end - slot_start} ${slot_end - slot_start === 1 ? 'oră' : 'ore'}</p>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">Ne vedem pe teren! Dacă ai întrebări, ne poți contacta direct.</p>
+              <p style="color: #6b7280; font-size: 14px;">— Echipa Sun Tropez 🌴</p>
+            </div>
           </div>
-        </div>
-      `
-    });
+        `
+      });
+      if (result.error) {
+        console.error('[EMAIL] Eroare Resend la confirmare client:', JSON.stringify(result.error));
+      } else {
+        console.log('[EMAIL] Confirmare trimisă către', email, '| id:', result.data?.id);
+      }
+    } catch (err) {
+      console.error('[EMAIL] Excepție la confirmare client:', err.message, JSON.stringify(err));
+    }
 
-    // Notify admin
-    if (resend) await resend.emails.send({
-      from: `Sun Tropez Rezervări <rezervari@${process.env.EMAIL_DOMAIN || 'rezervarisuntropez.ro'}>`,
-      to: ADMIN_EMAIL,
-      subject: `Rezervare nouă: ${prenume} ${nume} - ${date}`,
-      html: `
-        <p>Rezervare nouă înregistrată:</p>
-        <ul>
-          <li><strong>Nume:</strong> ${prenume} ${nume}</li>
-          <li><strong>Email:</strong> ${email}</li>
-          <li><strong>Data:</strong> ${date}</li>
-          <li><strong>Ora:</strong> ${formatHour(slot_start)} - ${formatHour(slot_end)}</li>
-        </ul>
-      `
-    });
-  } catch (err) {
-    console.error('Email error:', err.message);
+    // Notification to admin
+    try {
+      const result = await resend.emails.send({
+        from: fromAddress,
+        to: ADMIN_EMAIL,
+        subject: `Rezervare nouă: ${prenume} ${nume} - ${date}`,
+        html: `
+          <p>Rezervare nouă înregistrată:</p>
+          <ul>
+            <li><strong>Nume:</strong> ${prenume} ${nume}</li>
+            <li><strong>Email:</strong> ${email}</li>
+            <li><strong>Data:</strong> ${date}</li>
+            <li><strong>Ora:</strong> ${formatHour(slot_start)} - ${formatHour(slot_end)}</li>
+          </ul>
+        `
+      });
+      if (result.error) {
+        console.error('[EMAIL] Eroare Resend la notificare admin:', JSON.stringify(result.error));
+      } else {
+        console.log('[EMAIL] Notificare admin trimisă | id:', result.data?.id);
+      }
+    } catch (err) {
+      console.error('[EMAIL] Excepție la notificare admin:', err.message, JSON.stringify(err));
+    }
   }
 
   res.json({ success: true, id: result.lastInsertRowid });
@@ -154,15 +177,23 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// GET all bookings (admin)
+// GET all bookings (admin) — optional ?month=YYYY-MM filter
 app.get('/api/admin/bookings', (req, res) => {
   const token = req.headers['x-admin-token'];
   if (token !== process.env.ADMIN_TOKEN) {
     return res.status(401).json({ error: 'Neautorizat.' });
   }
-  const bookings = db.prepare(
-    'SELECT * FROM bookings ORDER BY date ASC, slot_start ASC'
-  ).all();
+  const { month } = req.query; // e.g. "2026-04"
+  let bookings;
+  if (month && /^\d{4}-\d{2}$/.test(month)) {
+    bookings = db.prepare(
+      "SELECT * FROM bookings WHERE strftime('%Y-%m', date) = ? ORDER BY date ASC, slot_start ASC"
+    ).all(month);
+  } else {
+    bookings = db.prepare(
+      'SELECT * FROM bookings ORDER BY date ASC, slot_start ASC'
+    ).all();
+  }
   res.json(bookings);
 });
 
