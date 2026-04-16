@@ -6,7 +6,11 @@ const path = require('path');
 
 const app = express();
 const db = new DatabaseSync('bookings.db');
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null;
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
 
@@ -91,12 +95,14 @@ app.post('/api/bookings', async (req, res) => {
 
   // Send confirmation email
   try {
+    const resend = getResend();
+    if (!resend) { console.warn('RESEND_API_KEY lipsește — emailul nu a fost trimis.'); }
     const formatHour = h => `${String(h).padStart(2, '0')}:00`;
     const dateFormatted = new Date(date + 'T12:00:00').toLocaleDateString('ro-RO', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    await resend.emails.send({
+    if (resend) await resend.emails.send({
       from: `Sun Tropez Beach Volleyball <rezervari@${process.env.EMAIL_DOMAIN || 'rezervarisuntropez.ro'}>`,
       to: email,
       subject: 'Confirmare rezervare teren - Sun Tropez Beach Volleyball',
@@ -122,7 +128,7 @@ app.post('/api/bookings', async (req, res) => {
     });
 
     // Notify admin
-    await resend.emails.send({
+    if (resend) await resend.emails.send({
       from: `Sun Tropez Rezervări <rezervari@${process.env.EMAIL_DOMAIN || 'rezervarisuntropez.ro'}>`,
       to: ADMIN_EMAIL,
       subject: `Rezervare nouă: ${prenume} ${nume} - ${date}`,
