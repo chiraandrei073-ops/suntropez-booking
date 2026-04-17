@@ -5,7 +5,7 @@ const { Resend } = require('resend');
 const path = require('path');
 
 const app = express();
-const db = new DatabaseSync('bookings.db');
+const db = new DatabaseSync(process.env.DB_PATH || 'bookings.db');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 
