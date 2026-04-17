@@ -94,7 +94,10 @@ app.post('/api/bookings', async (req, res) => {
     'INSERT INTO bookings (date, slot_start, slot_end, nume, prenume, email) VALUES (?, ?, ?, ?, ?, ?)'
   ).run(date, slot_start, slot_end, nume, prenume, email);
 
-  // Send emails
+  // Respond immediately — email se trimite în fundal
+  res.json({ success: true, id: result.lastInsertRowid });
+
+  // Send emails async (non-blocking)
   const mailer = getMailer();
   if (!mailer) {
     console.warn('[EMAIL] GMAIL_USER/GMAIL_PASS lipsesc — emailul nu a fost trimis.');
@@ -161,7 +164,6 @@ app.post('/api/bookings', async (req, res) => {
     }
   }
 
-  res.json({ success: true, id: result.lastInsertRowid });
 });
 
 // Admin page route
