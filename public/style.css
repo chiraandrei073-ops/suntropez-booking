@@ -13,86 +13,58 @@ body {
 #gate-screen {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
+  background: #fff7ed;
+}
+
+#gate-screen header { flex-shrink: 0; }
+
+.gate-body {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
-  padding: 24px;
+  padding: 32px 16px;
 }
 
 .gate-card {
-  background: white;
-  border-radius: 24px;
-  padding: 40px 36px;
   max-width: 380px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
-.gate-logo {
-  font-size: 56px;
-  margin-bottom: 12px;
-  animation: float 3s ease-in-out infinite;
-}
-
-.gate-card h1 {
-  font-size: 20px;
-  font-weight: 800;
-  color: #1f2937;
-  margin-bottom: 8px;
-}
-
-.gate-card > p {
+.gate-sub {
   font-size: 14px;
   color: #6b7280;
   margin-bottom: 24px;
+  margin-top: 4px;
 }
 
-.gate-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.gate-form input {
+.gate-input {
+  width: 100%;
   padding: 14px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 20px;
   font-family: 'Inter', sans-serif;
   outline: none;
   text-align: center;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   transition: all 0.15s;
+  margin-bottom: 8px;
+  display: block;
 }
 
-.gate-form input:focus {
+.gate-input:focus {
   border-color: #f97316;
   box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
 }
 
-.gate-form button {
-  padding: 14px;
-  background: linear-gradient(135deg, #ea580c, #f97316);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 16px rgba(234,88,12,0.3);
-}
-
-.gate-form button:hover { opacity: 0.92; transform: translateY(-1px); }
-.gate-form button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
 #gate-error {
   color: #ef4444;
   font-size: 13px;
-  margin-top: 10px;
-  min-height: 18px;
+  min-height: 20px;
+  margin-bottom: 8px;
 }
 
 /* HEADER */
