@@ -195,22 +195,6 @@ app.post('/api/bookings', async (req, res) => {
         : console.log('[EMAIL] Confirmare trimisă către', email, '| id:', r.data?.id))
       .catch(err => console.error('[EMAIL] Excepție confirmare:', err.message));
 
-    // Notification to admin
-    if (ADMIN_EMAIL) {
-      resend.emails.send({
-        from, to: ADMIN_EMAIL,
-        subject: `Rezervare nouă: ${prenume} ${nume} – ${date}`,
-        html: `<p>Rezervare nouă:</p><ul>
-          <li><strong>Nume:</strong> ${prenume} ${nume}</li>
-          <li><strong>Email:</strong> ${email}</li>
-          <li><strong>Data:</strong> ${date}</li>
-          <li><strong>Ora:</strong> ${pad(slot_start)} – ${pad(slot_end)}</li></ul>`
-      })
-        .then(r => r.error
-          ? console.error('[EMAIL] Eroare admin:', JSON.stringify(r.error))
-          : console.log('[EMAIL] Notificare admin trimisă.'))
-        .catch(err => console.error('[EMAIL] Excepție admin:', err.message));
-    }
   }
 
 });
