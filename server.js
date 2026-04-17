@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { DatabaseSync } = require('node:sqlite');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const path = require('path');
 
 const app = express();
@@ -9,15 +9,9 @@ const db = new DatabaseSync('bookings.db');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 
-function getMailer() {
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) return null;
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS,
-    }
-  });
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null;
+  return new Resend(process.env.RESEND_API_KEY);
 }
 
 // Setup DB
@@ -98,11 +92,12 @@ app.post('/api/bookings', async (req, res) => {
   res.json({ success: true, id: result.lastInsertRowid });
 
   // Send emails async (non-blocking)
-  const mailer = getMailer();
-  if (!mailer) {
-    console.warn('[EMAIL] GMAIL_USER/GMAIL_PASS lipsesc — emailul nu a fost trimis.');
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[EMAIL] RESEND_API_KEY lipsește — emailul nu a fost trimis.');
   } else {
     const pad = h => `${String(h).padStart(2, '0')}:00`;
+    const from = `Sun Tropez Beach Volleyball <noreply@${process.env.EMAIL_DOMAIN}>`;
     const dateFormatted = new Date(date + 'T12:00:00').toLocaleDateString('ro-RO', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
@@ -128,39 +123,27 @@ app.post('/api/bookings', async (req, res) => {
     `;
 
     // Confirmation to client
-    try {
-      await mailer.sendMail({
-        from: `Sun Tropez Beach Volleyball <${process.env.GMAIL_USER}>`,
-        to: email,
-        subject: 'Confirmare rezervare teren - Sun Tropez Beach Volleyball',
-        html: emailHtml,
-      });
-      console.log('[EMAIL] Confirmare trimisă către', email);
-    } catch (err) {
-      console.error('[EMAIL] Eroare la confirmare client:', err.message);
-    }
+    resend.emails.send({ from, to: email, subject: 'Confirmare rezervare teren - Sun Tropez Beach Volleyball', html: emailHtml })
+      .then(r => r.error
+        ? console.error('[EMAIL] Eroare confirmare:', JSON.stringify(r.error))
+        : console.log('[EMAIL] Confirmare trimisă către', email, '| id:', r.data?.id))
+      .catch(err => console.error('[EMAIL] Excepție confirmare:', err.message));
 
     // Notification to admin
     if (ADMIN_EMAIL) {
-      try {
-        await mailer.sendMail({
-          from: `Sun Tropez Rezervări <${process.env.GMAIL_USER}>`,
-          to: ADMIN_EMAIL,
-          subject: `Rezervare nouă: ${prenume} ${nume} – ${date}`,
-          html: `
-            <p>Rezervare nouă înregistrată:</p>
-            <ul>
-              <li><strong>Nume:</strong> ${prenume} ${nume}</li>
-              <li><strong>Email:</strong> ${email}</li>
-              <li><strong>Data:</strong> ${date}</li>
-              <li><strong>Ora:</strong> ${pad(slot_start)} – ${pad(slot_end)}</li>
-            </ul>
-          `,
-        });
-        console.log('[EMAIL] Notificare admin trimisă.');
-      } catch (err) {
-        console.error('[EMAIL] Eroare la notificare admin:', err.message);
-      }
+      resend.emails.send({
+        from, to: ADMIN_EMAIL,
+        subject: `Rezervare nouă: ${prenume} ${nume} – ${date}`,
+        html: `<p>Rezervare nouă:</p><ul>
+          <li><strong>Nume:</strong> ${prenume} ${nume}</li>
+          <li><strong>Email:</strong> ${email}</li>
+          <li><strong>Data:</strong> ${date}</li>
+          <li><strong>Ora:</strong> ${pad(slot_start)} – ${pad(slot_end)}</li></ul>`
+      })
+        .then(r => r.error
+          ? console.error('[EMAIL] Eroare admin:', JSON.stringify(r.error))
+          : console.log('[EMAIL] Notificare admin trimisă.'))
+        .catch(err => console.error('[EMAIL] Excepție admin:', err.message));
     }
   }
 
