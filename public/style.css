@@ -11,11 +11,16 @@ body {
 
 /* GATE SCREEN */
 #gate-screen {
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #fff7ed;
   display: flex;
   flex-direction: column;
-  background: #fff7ed;
+  overflow-y: auto;
 }
+
+#gate-screen.hidden { display: none; }
 
 #gate-screen header { flex-shrink: 0; }
 

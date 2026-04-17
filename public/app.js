@@ -282,8 +282,7 @@ document.getElementById('gate-input').addEventListener('keydown', e => {
 });
 
 function showMainContent() {
-  document.getElementById('gate-screen').style.display = 'none';
-  document.getElementById('main-content').classList.remove('hidden');
+  document.getElementById('gate-screen').classList.add('hidden');
 }
 
 // Init
