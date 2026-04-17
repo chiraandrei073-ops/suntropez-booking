@@ -283,6 +283,7 @@ document.getElementById('gate-input').addEventListener('keydown', e => {
 
 function showMainContent() {
   document.getElementById('gate-screen').classList.add('hidden');
+  document.getElementById('main-content').classList.add('visible');
 }
 
 // Init
