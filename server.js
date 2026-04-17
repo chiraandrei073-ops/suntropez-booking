@@ -5,7 +5,17 @@ const { Resend } = require('resend');
 const path = require('path');
 
 const app = express();
-const db = new DatabaseSync(process.env.DB_PATH || 'bookings.db');
+
+const dbPath = process.env.DB_PATH || 'bookings.db';
+console.log('[DB] Folosesc baza de date la:', dbPath);
+let db;
+try {
+  db = new DatabaseSync(dbPath);
+} catch (err) {
+  console.error('[DB] Eroare la deschiderea bazei de date:', err.message);
+  console.error('[DB] Încerc fallback la bookings.db local...');
+  db = new DatabaseSync('bookings.db');
+}
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 
