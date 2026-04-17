@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acces - Sun Tropez Beach Volleyball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body style="display:flex; flex-direction:column; min-height:100vh; background:#fff7ed;">
+
+  <header>
+    <div class="header-bg"></div>
+    <div class="header-inner">
+      <div class="header-text">
+        <div class="header-logo">🏐</div>
+        <h1>Sun Tropez Beach Volleyball</h1>
+        <p class="tagline">Rezervă terenul tău — nisip, soare și joc</p>
+      </div>
+    </div>
+  </header>
+
+  <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:32px 16px;">
+    <div class="card" style="max-width:360px; width:100%; text-align:center;">
+      <h2 style="display:block; font-size:20px; font-weight:700; margin-bottom:8px;">Cod de acces</h2>
+      <p style="font-size:14px; color:#6b7280; margin-bottom:24px;">Introdu codul primit pentru a face o rezervare.</p>
+      <input
+        type="password"
+        id="code-input"
+        placeholder="Cod de acces"
+        autocomplete="off"
+        style="width:100%; padding:14px 16px; border:2px solid #e5e7eb; border-radius:12px;
+               font-size:18px; font-family:'Inter',sans-serif; outline:none; text-align:center;
+               letter-spacing:4px; margin-bottom:8px; transition:border 0.15s;"
+        onfocus="this.style.borderColor='#f97316'"
+        onblur="this.style.borderColor='#e5e7eb'"
+      />
+      <p id="error-msg" style="color:#ef4444; font-size:13px; min-height:20px; margin-bottom:10px;"></p>
+      <div style="text-align:center;">
+        <button id="submit-btn" onclick="submit()"
+          style="background:linear-gradient(135deg,#ea580c,#f97316); color:white; border:none;
+                 border-radius:50px; padding:14px 52px; font-size:16px; font-weight:700;
+                 font-family:'Inter',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(234,88,12,0.3);
+                 transition:all 0.2s;">
+          Intră
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('code-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submit();
+    });
+
+    async function submit() {
+      const btn   = document.getElementById('submit-btn');
+      const input = document.getElementById('code-input');
+      const error = document.getElementById('error-msg');
+      const code  = input.value.trim();
+      if (!code) return;
+
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          error.textContent = 'Cod incorect. Încearcă din nou.';
+          input.value = '';
+          input.focus();
+        }
+      } catch {
+        error.textContent = 'Eroare de conexiune.';
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Intră';
+    }
+  </script>
+</body>
+</html>

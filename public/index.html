@@ -11,31 +11,6 @@
 </head>
 <body>
 
-  <!-- GATE OVERLAY -->
-  <div id="gate-screen">
-    <header>
-      <div class="header-bg"></div>
-      <div class="header-inner">
-        <div class="header-text">
-          <div class="header-logo">🏐</div>
-          <h1>Sun Tropez Beach Volleyball</h1>
-          <p class="tagline">Rezervă terenul tău — nisip, soare și joc</p>
-        </div>
-      </div>
-    </header>
-    <div class="gate-body">
-      <div class="gate-card">
-        <h2 class="gate-title">Cod de acces</h2>
-        <p class="gate-sub">Introdu codul primit pentru a face o rezervare.</p>
-        <input class="gate-input" type="password" id="gate-input" placeholder="Cod de acces" autocomplete="off" />
-        <p id="gate-error"></p>
-        <button class="gate-btn" id="gate-btn" onclick="submitGate()">Intră</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <div id="main-content">
   <header>
     <div class="header-bg"></div>
     <div class="header-inner">
@@ -49,7 +24,6 @@
 
   <main>
 
-    <!-- STEP 1: Date picker -->
     <section class="card" id="step-date">
       <h2><span class="step-badge">1</span> Alege data</h2>
       <div class="date-nav">
@@ -65,7 +39,6 @@
       <p class="hint">Rezervările sunt disponibile în următoarele 14 zile.</p>
     </section>
 
-    <!-- STEP 2: Slot picker -->
     <section class="card hidden" id="step-slots">
       <h2><span class="step-badge">2</span> Alege ora <span id="selected-date-label" class="date-label"></span></h2>
       <p class="hint">Selectează 1 sau 2 ore consecutive. Maxim 2 ore per zi.</p>
@@ -78,7 +51,6 @@
       <button class="btn-primary" id="confirm-slots" disabled>Continuă →</button>
     </section>
 
-    <!-- STEP 3: Form -->
     <section class="card hidden" id="step-form">
       <h2><span class="step-badge">3</span> Datele tale</h2>
       <div class="summary-box" id="booking-summary"></div>
@@ -101,7 +73,6 @@
       </form>
     </section>
 
-    <!-- STEP 4: Success -->
     <section class="card hidden" id="step-success">
       <div class="success-icon">🏐</div>
       <h2>Rezervare confirmată!</h2>
@@ -115,8 +86,6 @@
   <footer>
     <p>Sun Tropez Beach Volleyball &mdash; Salicea &mdash; <a href="/admin">Admin</a></p>
   </footer>
-
-  </div><!-- /main-content -->
 
   <script src="app.js"></script>
 </body>

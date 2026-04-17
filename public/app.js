@@ -237,59 +237,5 @@ document.getElementById('booking-form').addEventListener('submit', async (e) => 
   }
 });
 
-// --- GATE ---
-let _accessCode = null;
-
-async function loadConfig() {
-  try {
-    const res = await fetch('/api/config');
-    const data = await res.json();
-    _accessCode = data.accessCode;
-  } catch {
-    _accessCode = null;
-  }
-}
-
-async function submitGate() {
-  const btn   = document.getElementById('gate-btn');
-  const input = document.getElementById('gate-input');
-  const error = document.getElementById('gate-error');
-  const code  = input.value.trim();
-
-  if (!code) return;
-  btn.disabled = true;
-  btn.textContent = '...';
-
-  // Reload config in case it wasn't loaded yet
-  if (_accessCode === null) await loadConfig();
-
-  const correct = !_accessCode || code === _accessCode;
-
-  if (correct) {
-    localStorage.setItem('access_granted', '1');
-    showMainContent();
-  } else {
-    error.textContent = 'Cod incorect. Încearcă din nou.';
-    input.value = '';
-    input.focus();
-    btn.disabled = false;
-    btn.textContent = 'Intră';
-  }
-}
-
-document.getElementById('gate-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitGate();
-});
-
-function showMainContent() {
-  document.getElementById('gate-screen').classList.add('hidden');
-  document.getElementById('main-content').classList.add('visible');
-}
-
 // Init
-loadConfig().then(() => {
-  if (!_accessCode || localStorage.getItem('access_granted') === '1') {
-    showMainContent();
-  }
-});
 renderCalendar();
