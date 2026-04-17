@@ -211,13 +211,53 @@ app.get('/api/admin/stats', (req, res) => {
 });
 
 // DELETE booking (admin)
-app.delete('/api/admin/bookings/:id', (req, res) => {
+app.delete('/api/admin/bookings/:id', async (req, res) => {
   const token = req.headers['x-admin-token'];
   if (token !== process.env.ADMIN_TOKEN) {
     return res.status(401).json({ error: 'Neautorizat.' });
   }
+
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+  if (!booking) return res.status(404).json({ error: 'Rezervarea nu există.' });
+
   db.prepare('DELETE FROM bookings WHERE id = ?').run(req.params.id);
   res.json({ success: true });
+
+  // Send cancellation email async
+  const resend = getResend();
+  if (resend && booking.email) {
+    const pad = h => `${String(h).padStart(2, '0')}:00`;
+    const dateFormatted = new Date(booking.date + 'T12:00:00').toLocaleDateString('ro-RO', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    resend.emails.send({
+      from: `Sun Tropez Beach Volleyball <noreply@${process.env.EMAIL_DOMAIN}>`,
+      to: booking.email,
+      subject: 'Rezervare anulată - Sun Tropez Beach Volleyball',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #fef2f2; border-radius: 12px; overflow: hidden;">
+          <div style="background: linear-gradient(135deg, #dc2626, #ef4444); padding: 32px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">Rezervare anulată</h1>
+            <p style="color: #fee2e2; margin: 8px 0 0;">Sun Tropez Beach Volleyball</p>
+          </div>
+          <div style="padding: 32px;">
+            <p style="font-size: 16px; color: #374151;">Salut <strong>${booking.prenume} ${booking.nume}</strong>,</p>
+            <p style="color: #6b7280;">Ne pare rău, rezervarea ta a fost anulată.</p>
+            <div style="background: white; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #ef4444;">
+              <p style="margin: 0 0 8px;"><strong>📅 Data:</strong> ${dateFormatted}</p>
+              <p style="margin: 0;"><strong>⏰ Ora:</strong> ${pad(booking.slot_start)} – ${pad(booking.slot_end)}</p>
+            </div>
+            <p style="color: #6b7280; font-size: 14px;">Pentru informații suplimentare, ne poți contacta direct.</p>
+            <p style="color: #6b7280; font-size: 14px;">— Echipa Sun Tropez 🌴</p>
+          </div>
+        </div>
+      `
+    })
+      .then(r => r.error
+        ? console.error('[EMAIL] Eroare anulare:', JSON.stringify(r.error))
+        : console.log('[EMAIL] Anulare trimisă către', booking.email))
+      .catch(err => console.error('[EMAIL] Excepție anulare:', err.message));
+  }
 });
 
 const PORT = process.env.PORT || 3000;
