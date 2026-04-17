@@ -33,6 +33,11 @@ body {
   text-align: center;
 }
 
+.gate-card .btn-primary {
+  width: auto;
+  padding: 13px 40px;
+}
+
 .gate-sub {
   font-size: 14px;
   color: #6b7280;
