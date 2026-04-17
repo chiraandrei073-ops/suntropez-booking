@@ -40,8 +40,11 @@ db.exec(`
 
 const crypto = require('crypto');
 
-// Token generat la fiecare pornire a serverului
-const SESSION_TOKEN = crypto.randomBytes(32).toString('hex');
+// Token derivat din ACCESS_CODE — stabil între reporniri
+const SESSION_TOKEN = crypto
+  .createHash('sha256')
+  .update((process.env.ACCESS_CODE || 'default') + 'suntropez_salt')
+  .digest('hex');
 
 function getCookie(req, name) {
   const cookies = req.headers.cookie || '';
