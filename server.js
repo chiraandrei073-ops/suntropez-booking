@@ -1,18 +1,24 @@
 require('dotenv').config();
 const express = require('express');
 const { DatabaseSync } = require('node:sqlite');
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 const path = require('path');
 
 const app = express();
 const db = new DatabaseSync('bookings.db');
 
-function getResend() {
-  if (!process.env.RESEND_API_KEY) return null;
-  return new Resend(process.env.RESEND_API_KEY);
-}
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
+function getMailer() {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) return null;
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
+    }
+  });
+}
 
 // Setup DB
 db.exec(`
@@ -27,11 +33,6 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   )
 `);
-
-// Helper wrappers
-const dbAll = (sql, ...params) => db.prepare(sql).all(...params);
-const dbGet = (sql, ...params) => db.prepare(sql).get(...params);
-const dbRun = (sql, ...params) => db.prepare(sql).run(...params);
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -93,79 +94,70 @@ app.post('/api/bookings', async (req, res) => {
     'INSERT INTO bookings (date, slot_start, slot_end, nume, prenume, email) VALUES (?, ?, ?, ?, ?, ?)'
   ).run(date, slot_start, slot_end, nume, prenume, email);
 
-  // Send confirmation email
-  const resend = getResend();
-  if (!resend) {
-    console.warn('[EMAIL] RESEND_API_KEY lipsește — emailul nu a fost trimis.');
+  // Send emails
+  const mailer = getMailer();
+  if (!mailer) {
+    console.warn('[EMAIL] GMAIL_USER/GMAIL_PASS lipsesc — emailul nu a fost trimis.');
   } else {
-    const formatHour = h => `${String(h).padStart(2, '0')}:00`;
+    const pad = h => `${String(h).padStart(2, '0')}:00`;
     const dateFormatted = new Date(date + 'T12:00:00').toLocaleDateString('ro-RO', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
-    // Use Resend's shared domain if custom domain not configured
-    const fromDomain = process.env.EMAIL_DOMAIN || 'onboarding@resend.dev';
-    const fromAddress = process.env.EMAIL_DOMAIN
-      ? `Sun Tropez Beach Volleyball <rezervari@${process.env.EMAIL_DOMAIN}>`
-      : 'Sun Tropez <onboarding@resend.dev>';
+    const dur = slot_end - slot_start;
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #fff8f0; border-radius: 12px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #f97316, #fb923c); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">🏐 Rezervare confirmată!</h1>
+          <p style="color: #fff3e0; margin: 8px 0 0;">Sun Tropez Beach Volleyball</p>
+        </div>
+        <div style="padding: 32px;">
+          <p style="font-size: 16px; color: #374151;">Salut <strong>${prenume} ${nume}</strong>,</p>
+          <p style="color: #6b7280;">Rezervarea ta a fost înregistrată cu succes!</p>
+          <div style="background: white; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #f97316;">
+            <p style="margin: 0 0 8px;"><strong>📅 Data:</strong> ${dateFormatted}</p>
+            <p style="margin: 0 0 8px;"><strong>⏰ Ora:</strong> ${pad(slot_start)} – ${pad(slot_end)}</p>
+            <p style="margin: 0;"><strong>⏱ Durată:</strong> ${dur} ${dur === 1 ? 'oră' : 'ore'}</p>
+          </div>
+          <p style="color: #6b7280; font-size: 14px;">Ne vedem pe teren! Dacă ai întrebări, ne poți contacta direct.</p>
+          <p style="color: #6b7280; font-size: 14px;">— Echipa Sun Tropez 🌴</p>
+        </div>
+      </div>
+    `;
 
     // Confirmation to client
     try {
-      const result = await resend.emails.send({
-        from: fromAddress,
+      await mailer.sendMail({
+        from: `Sun Tropez Beach Volleyball <${process.env.GMAIL_USER}>`,
         to: email,
         subject: 'Confirmare rezervare teren - Sun Tropez Beach Volleyball',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #fff8f0; border-radius: 12px; overflow: hidden;">
-            <div style="background: linear-gradient(135deg, #f97316, #fb923c); padding: 32px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">🏐 Rezervare confirmată!</h1>
-              <p style="color: #fff3e0; margin: 8px 0 0;">Sun Tropez Beach Volleyball</p>
-            </div>
-            <div style="padding: 32px;">
-              <p style="font-size: 16px; color: #374151;">Salut <strong>${prenume} ${nume}</strong>,</p>
-              <p style="color: #6b7280;">Rezervarea ta a fost înregistrată cu succes!</p>
-              <div style="background: white; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #f97316;">
-                <p style="margin: 0 0 8px;"><strong>📅 Data:</strong> ${dateFormatted}</p>
-                <p style="margin: 0 0 8px;"><strong>⏰ Ora:</strong> ${formatHour(slot_start)} - ${formatHour(slot_end)}</p>
-                <p style="margin: 0;"><strong>⏱ Durată:</strong> ${slot_end - slot_start} ${slot_end - slot_start === 1 ? 'oră' : 'ore'}</p>
-              </div>
-              <p style="color: #6b7280; font-size: 14px;">Ne vedem pe teren! Dacă ai întrebări, ne poți contacta direct.</p>
-              <p style="color: #6b7280; font-size: 14px;">— Echipa Sun Tropez 🌴</p>
-            </div>
-          </div>
-        `
+        html: emailHtml,
       });
-      if (result.error) {
-        console.error('[EMAIL] Eroare Resend la confirmare client:', JSON.stringify(result.error));
-      } else {
-        console.log('[EMAIL] Confirmare trimisă către', email, '| id:', result.data?.id);
-      }
+      console.log('[EMAIL] Confirmare trimisă către', email);
     } catch (err) {
-      console.error('[EMAIL] Excepție la confirmare client:', err.message, JSON.stringify(err));
+      console.error('[EMAIL] Eroare la confirmare client:', err.message);
     }
 
     // Notification to admin
-    try {
-      const result = await resend.emails.send({
-        from: fromAddress,
-        to: ADMIN_EMAIL,
-        subject: `Rezervare nouă: ${prenume} ${nume} - ${date}`,
-        html: `
-          <p>Rezervare nouă înregistrată:</p>
-          <ul>
-            <li><strong>Nume:</strong> ${prenume} ${nume}</li>
-            <li><strong>Email:</strong> ${email}</li>
-            <li><strong>Data:</strong> ${date}</li>
-            <li><strong>Ora:</strong> ${formatHour(slot_start)} - ${formatHour(slot_end)}</li>
-          </ul>
-        `
-      });
-      if (result.error) {
-        console.error('[EMAIL] Eroare Resend la notificare admin:', JSON.stringify(result.error));
-      } else {
-        console.log('[EMAIL] Notificare admin trimisă | id:', result.data?.id);
+    if (ADMIN_EMAIL) {
+      try {
+        await mailer.sendMail({
+          from: `Sun Tropez Rezervări <${process.env.GMAIL_USER}>`,
+          to: ADMIN_EMAIL,
+          subject: `Rezervare nouă: ${prenume} ${nume} – ${date}`,
+          html: `
+            <p>Rezervare nouă înregistrată:</p>
+            <ul>
+              <li><strong>Nume:</strong> ${prenume} ${nume}</li>
+              <li><strong>Email:</strong> ${email}</li>
+              <li><strong>Data:</strong> ${date}</li>
+              <li><strong>Ora:</strong> ${pad(slot_start)} – ${pad(slot_end)}</li>
+            </ul>
+          `,
+        });
+        console.log('[EMAIL] Notificare admin trimisă.');
+      } catch (err) {
+        console.error('[EMAIL] Eroare la notificare admin:', err.message);
       }
-    } catch (err) {
-      console.error('[EMAIL] Excepție la notificare admin:', err.message, JSON.stringify(err));
     }
   }
 
@@ -183,7 +175,7 @@ app.get('/api/admin/bookings', (req, res) => {
   if (token !== process.env.ADMIN_TOKEN) {
     return res.status(401).json({ error: 'Neautorizat.' });
   }
-  const { month } = req.query; // e.g. "2026-04"
+  const { month } = req.query;
   let bookings;
   if (month && /^\d{4}-\d{2}$/.test(month)) {
     bookings = db.prepare(
@@ -208,9 +200,9 @@ app.get('/api/admin/stats', (req, res) => {
   weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
   const weekStartStr = weekStart.toISOString().slice(0, 10);
 
-  const total     = db.prepare('SELECT COUNT(*) as n FROM bookings').get().n;
-  const todayN    = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date = ?').get(todayStr).n;
-  const weekN     = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date >= ?').get(weekStartStr).n;
+  const total  = db.prepare('SELECT COUNT(*) as n FROM bookings').get().n;
+  const todayN = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date = ?').get(todayStr).n;
+  const weekN  = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date >= ?').get(weekStartStr).n;
   res.json({ total, today: todayN, week: weekN });
 });
 
