@@ -134,14 +134,22 @@ function renderSlots() {
   const grid = document.getElementById('slots-grid');
   grid.innerHTML = '';
 
+  const now = new Date();
+  const todayKey = dateKey(now);
+  const currentHour = now.getHours();
+
   slotsData.forEach(slot => {
+    const isPast = selectedDate === todayKey && slot.hour <= currentHour;
+    const isBooked = !slot.available;
+    const isSelected = selectedSlots.includes(slot.hour);
+
     const btn = document.createElement('button');
     btn.className = 'slot-btn'
-      + (!slot.available ? ' booked' : '')
-      + (selectedSlots.includes(slot.hour) ? ' selected' : '');
+      + (isBooked || isPast ? ' booked' : '')
+      + (isSelected ? ' selected' : '');
     btn.textContent = `${formatHour(slot.hour)}–${formatHour(slot.hour + 1)}`;
     btn.dataset.hour = slot.hour;
-    if (slot.available) btn.addEventListener('click', () => toggleSlot(slot.hour));
+    if (!isBooked && !isPast) btn.addEventListener('click', () => toggleSlot(slot.hour));
     grid.appendChild(btn);
   });
 

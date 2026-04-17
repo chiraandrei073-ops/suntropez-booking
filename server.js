@@ -59,6 +59,16 @@ app.post('/api/bookings', async (req, res) => {
   if (slot_start < 8 || slot_end > 21 || slot_end <= slot_start) {
     return res.status(400).json({ error: 'Interval orar invalid.' });
   }
+
+  // Block past hours on today
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const currentHour = new Date().getHours();
+  if (date === todayStr && slot_start <= currentHour) {
+    return res.status(400).json({ error: 'Nu poți rezerva ore din trecut.' });
+  }
+  if (date < todayStr) {
+    return res.status(400).json({ error: 'Nu poți rezerva date din trecut.' });
+  }
   if (slot_end - slot_start > 2) {
     return res.status(400).json({ error: 'Maxim 2 ore per rezervare.' });
   }
