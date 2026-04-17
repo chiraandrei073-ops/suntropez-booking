@@ -158,6 +158,12 @@ function renderSlots() {
 
 // --- TOGGLE SLOT ---
 function toggleSlot(hour) {
+  // Verificare în timp real — nu permite sloturi din trecut
+  const now = new Date();
+  if (selectedDate === dateKey(now) && hour <= now.getHours()) {
+    renderSlots(); // re-renderează ca să apară gri
+    return;
+  }
   if (selectedSlots.includes(hour)) {
     selectedSlots = selectedSlots.filter(h => h !== hour);
   } else if (selectedSlots.length === 0) {
@@ -236,6 +242,13 @@ document.getElementById('booking-form').addEventListener('submit', async (e) => 
     btn.textContent = 'Confirmă rezervarea';
   }
 });
+
+// Auto-refresh sloturi în fiecare minut (pentru ziua curentă)
+setInterval(() => {
+  if (selectedDate && selectedDate === dateKey(new Date())) {
+    renderSlots();
+  }
+}, 60000);
 
 // Init
 renderCalendar();
