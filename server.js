@@ -41,14 +41,10 @@ db.exec(`
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// POST verify access code
-app.post('/api/auth', (req, res) => {
-  const received = (req.body.code || '').trim();
-  const correct  = (process.env.ACCESS_CODE || '').trim();
-  console.log('[AUTH] primit:', JSON.stringify(received), '| env:', JSON.stringify(correct), '| match:', received === correct);
-  if (!correct) return res.json({ success: true });
-  if (received === correct) return res.json({ success: true });
-  return res.status(401).json({ error: 'Cod incorect.' });
+// GET access code config (used by frontend for comparison)
+app.get('/api/config', (req, res) => {
+  const code = (process.env.ACCESS_CODE || '').trim().replace(/^["']|["']$/g, '');
+  res.json({ accessCode: code || null });
 });
 
 // GET available slots for a date
