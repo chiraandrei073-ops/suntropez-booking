@@ -236,11 +236,14 @@ app.get('/api/admin/stats', (req, res) => {
   const todayStr = new Date().toISOString().slice(0, 10);
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
   const weekStartStr = weekStart.toISOString().slice(0, 10);
+  const weekEndStr   = weekEnd.toISOString().slice(0, 10);
 
   const total  = db.prepare('SELECT COUNT(*) as n FROM bookings').get().n;
   const todayN = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date = ?').get(todayStr).n;
-  const weekN  = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date >= ?').get(weekStartStr).n;
+  const weekN  = db.prepare('SELECT COUNT(*) as n FROM bookings WHERE date >= ? AND date <= ?').get(weekStartStr, weekEndStr).n;
   res.json({ total, today: todayN, week: weekN });
 });
 
