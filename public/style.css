@@ -298,6 +298,7 @@ main {
   border-color: #f3f4f6;
   text-decoration: line-through;
   opacity: 0.6;
+  pointer-events: none;
 }
 
 /* FORM */

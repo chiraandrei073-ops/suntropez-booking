@@ -137,9 +137,11 @@ function renderSlots() {
   const now = new Date();
   const todayKey = dateKey(now);
   const currentHour = now.getHours();
+  const isToday = selectedDate === todayKey;
+  console.log('[SLOTS] selectedDate:', selectedDate, '| todayKey:', todayKey, '| currentHour:', currentHour, '| isToday:', isToday);
 
   slotsData.forEach(slot => {
-    const isPast = selectedDate === todayKey && slot.hour <= currentHour;
+    const isPast = isToday && slot.hour <= currentHour;
     const isBooked = !slot.available;
     const isSelected = selectedSlots.includes(slot.hour);
 
