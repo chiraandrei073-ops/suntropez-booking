@@ -11,6 +11,21 @@
 </head>
 <body>
 
+  <!-- GATE: Ecran de acces -->
+  <div id="gate-screen">
+    <div class="gate-card">
+      <div class="gate-logo">🏐</div>
+      <h1>Sun Tropez Beach Volleyball</h1>
+      <p>Introdu codul de acces pentru a face o rezervare.</p>
+      <div class="gate-form">
+        <input type="password" id="gate-input" placeholder="Cod de acces..." autocomplete="off" />
+        <button id="gate-btn" onclick="submitGate()">Intră</button>
+      </div>
+      <p id="gate-error"></p>
+    </div>
+  </div>
+
+  <div id="main-content" class="hidden">
   <header>
     <div class="header-bg"></div>
     <div class="header-inner">
@@ -90,6 +105,8 @@
   <footer>
     <p>Sun Tropez Beach Volleyball &mdash; Salicea &mdash; <a href="/admin">Admin</a></p>
   </footer>
+
+  </div> <!-- /main-content -->
 
   <script src="app.js"></script>
 </body>

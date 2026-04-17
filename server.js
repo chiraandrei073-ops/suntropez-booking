@@ -31,6 +31,15 @@ db.exec(`
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// POST verify access code
+app.post('/api/auth', (req, res) => {
+  const { code } = req.body;
+  const correct = process.env.ACCESS_CODE;
+  if (!correct) return res.json({ success: true }); // dacă nu e setat, acces liber
+  if (code === correct) return res.json({ success: true });
+  return res.status(401).json({ error: 'Cod incorect.' });
+});
+
 // GET available slots for a date
 app.get('/api/slots/:date', (req, res) => {
   const { date } = req.params;

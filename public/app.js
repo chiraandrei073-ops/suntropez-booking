@@ -237,5 +237,50 @@ document.getElementById('booking-form').addEventListener('submit', async (e) => 
   }
 });
 
-// Init
+// --- GATE ---
+async function submitGate() {
+  const btn   = document.getElementById('gate-btn');
+  const input = document.getElementById('gate-input');
+  const error = document.getElementById('gate-error');
+  const code  = input.value.trim();
+
+  if (!code) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    const res  = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    if (res.ok) {
+      localStorage.setItem('access_granted', '1');
+      showMainContent();
+    } else {
+      error.textContent = 'Cod incorect. Încearcă din nou.';
+      input.value = '';
+      input.focus();
+    }
+  } catch {
+    error.textContent = 'Eroare de conexiune.';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Intră';
+}
+
+document.getElementById('gate-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitGate();
+});
+
+function showMainContent() {
+  document.getElementById('gate-screen').style.display = 'none';
+  document.getElementById('main-content').classList.remove('hidden');
+}
+
+// Init — check if already authenticated
+if (localStorage.getItem('access_granted') === '1') {
+  showMainContent();
+}
 renderCalendar();
