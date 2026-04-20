@@ -103,6 +103,13 @@
     }
     .booking-item:last-child { border-bottom: none; }
     .booking-item:hover { background: #fffbf7; }
+    .booking-item.past { opacity: 0.5; }
+    .booking-item.past:hover { background: transparent; }
+
+    .past-label {
+      font-size: 12px; color: #d1d5db; font-weight: 600;
+      white-space: nowrap; padding: 7px 13px;
+    }
 
     .booking-date-col {
       min-width: 110px; text-align: center;
@@ -308,7 +315,7 @@ function renderBookings(bookings) {
     });
 
     return `
-      <div class="booking-item" id="item-${b.id}">
+      <div class="booking-item${isFuture ? '' : ' past'}" id="item-${b.id}">
         <div class="booking-date-col">
           <div class="booking-day">${dayNum}</div>
           <div class="booking-month">${monthStr}</div>
@@ -320,7 +327,7 @@ function renderBookings(bookings) {
           <div class="booking-meta">Înregistrat: ${createdAt}</div>
         </div>
         <div class="booking-time ${isFuture ? '' : 'past'}">${pad(b.slot_start)} – ${pad(b.slot_end)}</div>
-        <button class="btn-cancel" onclick="cancelBooking(${b.id})">Anulează</button>
+        ${isFuture ? `<button class="btn-cancel" onclick="cancelBooking(${b.id})">Anulează</button>` : '<span class="past-label">Finalizat</span>'}
       </div>`;
   }).join('');
 }
