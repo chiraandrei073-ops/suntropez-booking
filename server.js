@@ -38,57 +38,9 @@ db.exec(`
   )
 `);
 
-const crypto = require('crypto');
-
-// Token derivat din ACCESS_CODE — stabil între reporniri
-const SESSION_TOKEN = crypto
-  .createHash('sha256')
-  .update((process.env.ACCESS_CODE || 'default') + 'suntropez_salt')
-  .digest('hex');
-
-function getCookie(req, name) {
-  const cookies = req.headers.cookie || '';
-  for (const part of cookies.split(';')) {
-    const [k, v] = part.trim().split('=');
-    if (k === name) return v;
-  }
-  return null;
-}
-
-function isAuthenticated(req) {
-  const code = (process.env.ACCESS_CODE || '').trim();
-  if (!code) return true; // fără cod setat = acces liber
-  return getCookie(req, 'st_access') === SESSION_TOKEN;
-}
-
 app.use(express.json());
 
-// Auth middleware — protejează fișierele principale
-app.use((req, res, next) => {
-  const publicPaths = ['/access', '/access.html', '/api/auth', '/style.css', '/favicon.ico'];
-  if (publicPaths.includes(req.path)) return next();
-  if (isAuthenticated(req)) return next();
-  res.redirect('/access');
-});
-
 app.use(express.static(path.join(__dirname, 'public')));
-
-// GET pagina de acces
-app.get('/access', (req, res) => {
-  if (isAuthenticated(req)) return res.redirect('/');
-  res.sendFile(path.join(__dirname, 'public', 'access.html'));
-});
-
-// POST validare cod de acces
-app.post('/api/auth', (req, res) => {
-  const received = (req.body.code || '').trim();
-  const correct  = (process.env.ACCESS_CODE || '').trim();
-  if (!correct || received === correct) {
-    res.setHeader('Set-Cookie', `st_access=${SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict`);
-    return res.json({ success: true });
-  }
-  res.status(401).json({ error: 'Cod incorect.' });
-});
 
 // GET available slots for a date
 app.get('/api/slots/:date', (req, res) => {
