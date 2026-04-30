@@ -16,8 +16,16 @@ function dateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function formatHour(h) {
-  return `${String(h).padStart(2,'0')}:00`;
+function formatTime(m) {
+  return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+}
+
+function formatDuration(minutes) {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (m === 0) return `${h} ${h === 1 ? 'oră' : 'ore'}`;
+  return `${h}h ${m}min`;
 }
 
 function formatDateLong(dateStr) {
@@ -136,12 +144,11 @@ function renderSlots() {
 
   const now = new Date();
   const todayKey = dateKey(now);
-  const currentHour = now.getHours();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const isToday = selectedDate === todayKey;
-  console.log('[SLOTS] selectedDate:', selectedDate, '| todayKey:', todayKey, '| currentHour:', currentHour, '| isToday:', isToday);
 
   slotsData.forEach(slot => {
-    const isPast = isToday && slot.hour <= currentHour;
+    const isPast = isToday && slot.hour <= nowMinutes;
     const isBooked = !slot.available;
     const isSelected = selectedSlots.includes(slot.hour);
 
@@ -149,7 +156,7 @@ function renderSlots() {
     btn.className = 'slot-btn'
       + (isBooked || isPast ? ' booked' : '')
       + (isSelected ? ' selected' : '');
-    btn.textContent = `${formatHour(slot.hour)}–${formatHour(slot.hour + 1)}`;
+    btn.textContent = `${formatTime(slot.hour)}–${formatTime(slot.hour + 30)}`;
     btn.dataset.hour = slot.hour;
     if (!isBooked && !isPast) btn.addEventListener('click', () => toggleSlot(slot.hour));
     grid.appendChild(btn);
@@ -162,23 +169,25 @@ function renderSlots() {
 function toggleSlot(hour) {
   // Verificare în timp real — nu permite sloturi din trecut
   const now = new Date();
-  if (selectedDate === dateKey(now) && hour <= now.getHours()) {
-    renderSlots(); // re-renderează ca să apară gri
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  if (selectedDate === dateKey(now) && hour <= nowMinutes) {
+    renderSlots();
     return;
   }
   if (selectedSlots.includes(hour)) {
     selectedSlots = selectedSlots.filter(h => h !== hour);
   } else if (selectedSlots.length === 0) {
     selectedSlots = [hour];
-  } else if (selectedSlots.length === 1) {
-    const other = selectedSlots[0];
-    if (Math.abs(hour - other) === 1) {
-      selectedSlots = [Math.min(hour, other), Math.max(hour, other)];
+  } else {
+    const minS = Math.min(...selectedSlots);
+    const maxS = Math.max(...selectedSlots);
+    if (hour === minS - 30) {
+      selectedSlots = [hour, ...selectedSlots];
+    } else if (hour === maxS + 30) {
+      selectedSlots = [...selectedSlots, hour];
     } else {
       selectedSlots = [hour];
     }
-  } else {
-    selectedSlots = [hour];
   }
   renderSlots();
   document.getElementById('confirm-slots').disabled = selectedSlots.length === 0;
@@ -187,11 +196,10 @@ function toggleSlot(hour) {
 // --- CONFIRM SLOTS ---
 document.getElementById('confirm-slots').addEventListener('click', () => {
   const slotStart = Math.min(...selectedSlots);
-  const slotEnd   = Math.max(...selectedSlots) + 1;
-  const dur = slotEnd - slotStart;
+  const slotEnd   = Math.max(...selectedSlots) + 30;
   document.getElementById('booking-summary').innerHTML =
     `📅 <strong>${formatDateLong(selectedDate)}</strong><br>` +
-    `⏰ <strong>${formatHour(slotStart)} – ${formatHour(slotEnd)}</strong> &nbsp;(${dur} ${dur === 1 ? 'oră' : 'ore'})`;
+    `⏰ <strong>${formatTime(slotStart)} – ${formatTime(slotEnd)}</strong> &nbsp;(${formatDuration(slotEnd - slotStart)})`;
   document.getElementById('step-form').classList.remove('hidden');
   document.getElementById('step-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
@@ -204,7 +212,7 @@ document.getElementById('booking-form').addEventListener('submit', async (e) => 
   btn.textContent = 'Se procesează...';
 
   const slotStart = Math.min(...selectedSlots);
-  const slotEnd   = Math.max(...selectedSlots) + 1;
+  const slotEnd   = Math.max(...selectedSlots) + 30;
 
   const body = {
     date: selectedDate,
@@ -226,7 +234,7 @@ document.getElementById('booking-form').addEventListener('submit', async (e) => 
     if (res.ok) {
       document.getElementById('success-summary').innerHTML =
         `📅 <strong>${formatDateLong(selectedDate)}</strong><br>` +
-        `⏰ <strong>${formatHour(slotStart)} – ${formatHour(slotEnd)}</strong><br>` +
+        `⏰ <strong>${formatTime(slotStart)} – ${formatTime(slotEnd)}</strong><br>` +
         `👤 <strong>${body.prenume} ${body.nume}</strong><br>` +
         `📧 ${body.email}`;
       document.getElementById('step-form').classList.add('hidden');

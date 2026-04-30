@@ -302,7 +302,7 @@ function renderBookings(bookings) {
   }
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const pad = h => String(h).padStart(2, '0') + ':00';
+  const pad = m => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 
   list.innerHTML = bookings.map(b => {
     const d = new Date(b.date + 'T12:00:00');
