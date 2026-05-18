@@ -61,7 +61,7 @@ app.get('/api/slots/:date', (req, res) => {
   });
 
   const slots = [];
-  for (let m = 480; m < 1260; m += 30) { // 08:00 → 20:30 (ultimul slot 20:30–21:00)
+  for (let m = 360; m < 1260; m += 30) { // 08:00 → 20:30 (ultimul slot 20:30–21:00)
     slots.push({ hour: m, available: !bookedMinutes.has(m) });
   }
   res.json(slots);
@@ -76,7 +76,7 @@ app.post('/api/bookings', async (req, res) => {
     return res.status(400).json({ error: 'Toate câmpurile sunt obligatorii.' });
   }
   // slot_start/slot_end sunt în minute de la miezul nopții (ex: 540 = 09:00, 570 = 09:30)
-  if (slot_start < 480 || slot_end > 1260 || slot_end <= slot_start || (slot_start % 30 !== 0) || (slot_end % 30 !== 0)) {
+  if (slot_start < 360 || slot_end > 1260 || slot_end <= slot_start || (slot_start % 30 !== 0) || (slot_end % 30 !== 0)) {
     return res.status(400).json({ error: 'Interval orar invalid.' });
   }
 
